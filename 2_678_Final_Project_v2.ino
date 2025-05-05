@@ -121,6 +121,7 @@ void loop()
   while (time3 < 1000 and sum < 50) //adjust time based on turning speed
   {
     drive (-200, 200); //reorienting straight (tunring left)
+    time3 = millis() - t3;
     sum = sensor();
   }
 
@@ -130,6 +131,7 @@ void loop()
   while (time4 < 2000 and sum < 50) //driving over any gap, adjust time as needed
   {
     drive(200,200);
+    time4 = millis() - t4;
     sum = sensor();
   }
 }
