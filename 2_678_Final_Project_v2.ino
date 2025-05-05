@@ -152,7 +152,7 @@ void pid()
 {
   int i = 0;
   
-  sensor();
+  sum = sensor();
 
   avg = sum/3;
 
