@@ -78,7 +78,6 @@ void setup()
   sp = pos;
 }
 
-
 void loop()
 {
   pid();
@@ -91,10 +90,52 @@ void loop()
   }
 
   //now assuming line isn't visible
+  
+  unsigned long t1 = millis();
+  unsigned long time1 = millis() - t1;
+  
+  while (time1 < 1000 and sum < 50)
+  {
+    drive(-200,200); //turning left
+    time1 = millis() - t1;
+    sum = sensor();
+  }
+  
+  if (sensor() > 50) return; //line visible again
+  
+  unsigned long t2 = millis();
+  unsigned long time2 = millis() - t2;
 
-  drive(-200,200); //turning left
-  delay(50); //adjust based on turning speed
+  while (time2 < 2000 and sum < 50) //adjust time and sum as needed
+  {
+    drive(200, -200); //turning right
+    time2 = millis() - t2;
+    sum = sensor();
+  }
 
+  if (sensor() > 50) return; //line visible again
+
+  unsigned long t3 = millis();
+  unsigned long time3 = millis() - t3;
+  
+  while (time3 < 1000 and sum < 50) //adjust time based on turning speed
+  {
+    drive (-200, 200); //reorienting straight (tunring left)
+    sum = sensor();
+  }
+
+  unsigned long t4 = millis();
+  unsigned long time4 = millis() - t4;
+
+  while (time4 < 2000 and sum < 50) //driving over any gap, adjust time as needed
+  {
+    drive(200,200);
+    sum = sensor();
+  }
+}
+
+int sensor()
+{
   sensL = analogRead(sens1);
   sensM = analogRead(sens2);
   sensR = analogRead(sens3);
@@ -104,42 +145,15 @@ void loop()
   int sensL_mapped = map(sensL, 29, 675, 0, 100); 
   sum = sensR_mapped + sensM_mapped + sensL_mapped;
 
-  if (sum > 50) return; //line visible again
-
-  drive(200, -200); //turning right
-  delay(100); //adjust based on turning speed
-
-  sensL = analogRead(sens1);
-  sensM = analogRead(sens2);
-  sensR = analogRead(sens3);
-
-  int sensR_mapped = map(sensR, 37, 909, 0, 100);
-  int sensM_mapped = map(sensM, 33, 903, 0, 100); 
-  int sensL_mapped = map(sensL, 29, 675, 0, 100); 
-  sum = sensR_mapped + sensM_mapped + sensL_mapped;
-
-  if (sum > 50) return; //line visible again
-
-  drive(-200,200); //reorienting straight (turning left)
-  delay(50); //adjust based on turning speed
-
-  drive(200,200); //going forward again
-  delay(100);
+  return sum;
 }
 
 void pid()
 {
   int i = 0;
   
-  sensL = analogRead(sens1);
-  sensM = analogRead(sens2);
-  sensR = analogRead(sens3);
+  sensor();
 
-  int sensR_mapped = map(sensR, 37, 909, 0, 100); //values determined by readings on paper, adjust as needed
-  int sensM_mapped = map(sensM, 33, 903, 0, 100); 
-  int sensL_mapped = map(sensL, 29, 675, 0, 100); 
-
-  sum = sensR_mapped + sensM_mapped + sensL_mapped;
   avg = sum/3;
 
   pos = avg/sum;
